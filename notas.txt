@@ -1,0 +1,39 @@
+crear una carpeta
+--mkdir {nombre de la carpeta}
+
+ingresar a la carpeta
+--cd {nombre de la carpeta}
+
+hacer la inicializacion de un proyecto para comenzar a configurar
+npm init -y
+
+instalar la dependencias del proyecto
+--npm install express 
+
+instalar cors para la comunicación con otro servidor
+-npm install cors
+
+instalar body-parser para manipular los archivos json
+--nom install body-parser
+
+instalar el monipulador de los datos de entorno
+--npm install dotenv
+
+instalar mysql2 para utilizar mysql
+--npm install mysql2
+
+instalar --save-dev sequalize_cli para las migraciones
+--npm install --save-dev sequelize-cli
+--npm install sequelize
+
+llamar a sequalize_cli para modificar la base de datos desde cualquier lugar
+--npx sequelize-cli init
+
+para crear la migracion y configurar la
+--npx sequelize-cli migration:generate --name create-clientes
+
+comando para crear una base de manera remota
+npx sequelize-cli db:create
+
+para realizar la migraciones
+--npx sequelize-cli db:migrate
