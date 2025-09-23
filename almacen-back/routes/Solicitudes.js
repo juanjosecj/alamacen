@@ -21,9 +21,9 @@ router.post("/", async (req, res) => {
 
     let totalSolicitud = 0;
 
-    // 1. Insertar solicitud vacía
+    // 1. Insertar solicitud inicial con estado "pendiente"
     const [solicitudResult] = await connection.query(
-      "INSERT INTO solicitudes (cliente_id, comentario, metodo_pago) VALUES (?, ?, ?)",
+      "INSERT INTO solicitudes (cliente_id, comentario, metodo_pago, estado) VALUES (?, ?, ?, 'pendiente')",
       [cliente_id, comentario || null, metodo_pago]
     );
 
@@ -77,6 +77,7 @@ router.post("/", async (req, res) => {
       message: "Solicitud creada con éxito",
       solicitud_id,
       total: totalSolicitud,
+      estado: "pendiente",
     });
   } catch (error) {
     await connection.rollback();
@@ -86,4 +87,60 @@ router.post("/", async (req, res) => {
     connection.release();
   }
 });
+
+// 📌 GET: Listar todas las solicitudes (admin)
+router.get("/", async (req, res) => {
+  try {
+    const [solicitudes] = await pool.query(`
+      SELECT s.id, s.cliente_id, s.comentario, s.metodo_pago, s.total, s.estado, s.fecha_creacion,
+             c.nombre AS cliente_nombre
+      FROM solicitudes s
+      JOIN clientes c ON s.cliente_id = c.id
+      ORDER BY s.fecha_creacion DESC
+    `);
+
+    for (const solicitud of solicitudes) {
+      const [detalles] = await pool.query(
+        `SELECT ds.item_id, i.nombre, ds.cantidad, ds.precio_unitario
+         FROM \`detalle-solicitud\` ds
+         JOIN items i ON ds.item_id = i.id
+         WHERE ds.solicitud_id = ?`,
+        [solicitud.id]
+      );
+      solicitud.detalles = detalles;
+    }
+
+    res.json(solicitudes);
+  } catch (error) {
+    console.error("Error al listar solicitudes:", error.message);
+    res.status(500).json({ error: "Error al obtener solicitudes" });
+  }
+});
+
+// 📌 PUT: Actualizar estado de una solicitud
+router.put("/:id/estado", async (req, res) => {
+  const { id } = req.params;
+  const { estado } = req.body;
+
+  if (!["pendiente", "aprobada", "rechazada", "entregada"].includes(estado)) {
+    return res.status(400).json({ error: "Estado no válido" });
+  }
+
+  try {
+    const [result] = await pool.query(
+      "UPDATE solicitudes SET estado = ? WHERE id = ?",
+      [estado, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Solicitud no encontrada" });
+    }
+
+    res.json({ message: "Estado actualizado correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar estado:", error.message);
+    res.status(500).json({ error: "Error al actualizar estado" });
+  }
+});
+
 export default router;

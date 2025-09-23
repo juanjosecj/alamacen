@@ -1,4 +1,3 @@
-
 'use strict';
 
 /** @type {import('sequelize-cli').Migration} */
@@ -10,17 +9,25 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.createTable('solicitudes', {
+    await queryInterface.createTable('facturas', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true
       },
-      cliente_id: {
+      solicitud_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: 'clientes',
+          model: 'solicitudes',
+          key: 'id'
+        }
+      },
+      user_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'users',
           key: 'id'
         }
       },
@@ -29,24 +36,25 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.NOW
       },
-      estado: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: 'pendiente'
-      },
-      comentario:{
-        type: Sequelize.STRING,
-        allowNull: true
-      },
-      total:{
+      total: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0.00
       },
-      metodo_pago:{
+      metodo_pago: {
         type: Sequelize.STRING,
         allowNull: true,
         defaultValue: 'efectivo'
+      },
+      numero_factura: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        unique: true
+      },
+      estado_factura:{
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'pendiente'
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -68,6 +76,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.dropTable('solicitudes');
+    await queryInterface.dropTable('facturas');
   }
 };

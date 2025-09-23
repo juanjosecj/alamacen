@@ -37,9 +37,9 @@ router.post("/", async (req, res) => {
         roleId: 2,
       },
     });
-  } catch (error) {
-    console.error("Error al registrar cliente:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+    } catch (error) {
+    console.error("Error al registrar cliente:", error); // 👈 imprime todo el error completo
+    res.status(500).json({ error: error.message });
   }
 });
 
