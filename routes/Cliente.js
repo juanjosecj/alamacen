@@ -6,10 +6,10 @@ const router = express.Router();
 
 /* ---------------- Registro de cliente ---------------- */
 router.post("/", async (req, res) => {
-  const { nombre, email, password } = req.body;
+  const { nombre, email, password, direccion, telefono } = req.body;
 
   try {
-    if (!nombre || !email || !password) {
+    if (!nombre || !email || !password ||!direccion || !telefono) {
       return res.status(400).json({ error: "Todos los campos son obligatorios" });
     }
 
@@ -24,8 +24,8 @@ router.post("/", async (req, res) => {
 
     // Insertar usuario con roleId = 2 (cliente)
     const [result] = await pool.query(
-      "INSERT INTO users (nombre, email, password, roleId) VALUES (?, ?, ?, ?)",
-      [nombre, email, hashedPassword, 2]
+      "INSERT INTO users (nombre, email, password, roleId, direccion, telefono) VALUES (?, ?, ?, ?, ?, ?)",
+      [nombre, email, hashedPassword, 2, direccion, telefono]
     );
 
     res.status(201).json({
@@ -34,6 +34,8 @@ router.post("/", async (req, res) => {
         id: result.insertId,
         nombre,
         email,
+        direccion,
+        telefono,
         roleId: 2,
       },
     });
@@ -71,6 +73,8 @@ router.post("/login", async (req, res) => {
       id: cliente.id,
       nombre: cliente.nombre,
       email: cliente.email,
+      direccion: cliente.direccion,
+      telefono: cliente.telefono,
       roleId: cliente.roleId,
     };
 
@@ -89,7 +93,7 @@ router.get("/user/:id", async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "SELECT id, nombre, email, roleId FROM users WHERE id = ?",
+      "SELECT id, nombre, email, direccion, telefono, roleId FROM users WHERE id = ?",
       [id]
     );
 
